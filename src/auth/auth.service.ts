@@ -3,6 +3,7 @@ import { UsersService } from "../users/users.service";
 import { RegisterUserDto } from "./dto/register.dto";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { Users } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,7 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async register(dto: RegisterUserDto): Promise<{ message: string }> {
+  async register(dto: RegisterUserDto): Promise<{ message: string, newUser: Users }> {
     // Check if username or email already exists by calling UserService
     const existingUser = await this.userService.findByEmail(dto.email);
 
@@ -26,13 +27,13 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     // Save user to database
-    await this.userService.createUser({
+    const user = await this.userService.createUser({
       email: dto.email,
       name: dto.name,
       password: hashedPassword,
     });
 
-    return { message: "Registration successful!" };
+    return { message: "Registration successful!", newUser: user };
   }
 
   async validateUser(email: string, password: string) {
@@ -47,10 +48,9 @@ export class AuthService {
   }
 
   async validateUserGoogle(user: RegisterUserDto) {
-    const findUser = await this.userService.findByEmail(user.email);
+    let findUser = await this.userService.findByEmail(user.email);
     if (!findUser) {
-      this.register(user);
-      return this.login(user);
+      findUser = (await this.register(user)).newUser;
     }
     return findUser;
   }
