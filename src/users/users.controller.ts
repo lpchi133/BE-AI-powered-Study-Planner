@@ -3,17 +3,21 @@ import {
   Get,
   Request,
   UnauthorizedException,
-} from '@nestjs/common';
-import { UsersService } from './users.service';
+} from "@nestjs/common";
+import { UsersService } from "./users.service";
 
-@Controller('users')
+@Controller("users")
 export class UsersController {
   constructor(private usersService: UsersService) {}
-  @Get('profile')
-  getProfile(@Request() req) {
+  @Get("profile")
+  async getProfile(@Request() req) {
     if (!req.user) {
-      throw new UnauthorizedException('Access denied');
+      throw new UnauthorizedException("Access denied");
     }
-    return this.usersService.getUserProfile(req.user.id);
+    const user = await this.usersService.getUserProfile(req.user.id);
+    if (!user) {
+      throw new UnauthorizedException("Access denied");
+    }
+    return user;
   }
 }
