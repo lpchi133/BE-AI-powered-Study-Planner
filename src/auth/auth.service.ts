@@ -47,10 +47,11 @@ export class AuthService {
   }
 
   async validateUserGoogle(user: RegisterUserDto) {
-    const findUser = await this.userService.findByEmail(user.email);
+    let findUser = await this.userService.findByEmail(user.email);
     if (!findUser) {
       this.register(user);
     }
+    findUser = await this.userService.findByEmail(user.email);
     return findUser;
   }
 
