@@ -50,7 +50,7 @@ export class AuthService {
     const findUser = await this.userService.findByEmail(user.email);
     if (!findUser) {
       this.register(user);
-      this.login(user);
+      return this.login(user);
     }
     return findUser;
   }
