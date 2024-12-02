@@ -48,7 +48,7 @@ export class AuthController {
     if (result.user) {
       const token = await this.authService.login(result.user);
       return res.redirect(
-        `${process.env.FRONTEND_URL}google/user/${token.accessToken}`
+        `${process.env.FRONTEND_URL}/google/user/${token.accessToken}`
       );
     }
 
