@@ -1,10 +1,17 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { JwtMiddleware } from '../middlewares/jwt.middleware';
+import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { UsersController } from './users.controller';
 
 @Module({
   providers: [UsersService, PrismaService],
   controllers: [UsersController],
 })
-export class UsersModule {}
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(JwtMiddleware)
+      .forRoutes(UsersController);
+  }
+}

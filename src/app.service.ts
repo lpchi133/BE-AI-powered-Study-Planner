@@ -10,6 +10,7 @@ export class AppService {
         "/auth/register - POST: Register a new user",
         "/auth/login - POST: User login",
         "/users/profile - GET: Get user profile",
+        "/users/changeAvt - POST: Change user's avt",
       ],
     };
   }
