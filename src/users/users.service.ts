@@ -28,12 +28,24 @@ export class UsersService {
 
   async updateProfilePicture(userId: number, file: Express.Multer.File): Promise<{ success: boolean, profilePictureUrl?: string }> {
     try {
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: 'profile_pictures',
-        public_id: `${userId}_${Date.now()}`,
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'profile_pictures',
+            public_id: `${userId}_${Date.now()}`,
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(file.buffer);
       });
   
-      const profilePictureUrl = result.secure_url;
+      const profilePictureUrl = (result as any).secure_url;
   
       await this.prisma.users.update({
         where: { id: userId },

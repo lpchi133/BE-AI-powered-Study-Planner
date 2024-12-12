@@ -14,7 +14,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtMiddleware  } from '../middlewares/jwt.middleware';
 import { UsersService } from "./users.service";
 import { Express } from 'express';
-import { diskStorage } from 'multer';
+import * as multer from 'multer';
 
 @Controller("users")
 export class UsersController {
@@ -35,13 +35,7 @@ export class UsersController {
   @Post('changeAvt')
   @UseGuards(JwtMiddleware)
   @UseInterceptors(FileInterceptor('profilePicture', {
-    storage: diskStorage({
-      destination: './uploads', // Thư mục lưu trữ tạm thời
-      filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix);
-      }
-    })
+    storage: multer.memoryStorage() // Sử dụng bộ nhớ trong bộ nhớ
   }))
   async changeProfilePicture(@UploadedFile() file: Express.Multer.File, @Req() req, @Res() res) {
     if (!file) {
@@ -53,7 +47,6 @@ export class UsersController {
       originalname: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
-      path: file.path,
     });
 
     const userId = req.user.id;
