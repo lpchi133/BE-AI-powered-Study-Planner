@@ -58,4 +58,63 @@ export class UsersService {
       return { success: false };
     }
   }
+
+  async createTask(userId: number, data: { label: string; description: string; status: string; date: string; time: string }) {
+    console.log('Received data:', data);
+    const dueDateTime = new Date(`${data.date}T${data.time}`);
+    console.log('Parsed dueDateTime:', dueDateTime);
+    return this.prisma.task.create({
+      data: {
+        itemLabel: data.label,
+        itemDescription: data.description,
+        itemStatus: data.status,
+        dueDateTime: dueDateTime,
+        userId: userId,
+      },
+    });
+  }
+
+  async getAllTasks(userId: number) {
+    return this.prisma.task.findMany({
+      where: { userId: userId },
+    });
+  }
+
+  async deleteTask(taskId: number) {
+    try {
+      await this.prisma.task.delete({
+        where: { id: taskId },
+      });
+      return { status: 'success' };
+    } catch (error) {
+      throw new Error(`Error deleting task: ${error.message}`);
+    }
+  }
+
+  async updateTask(userId: number, data: { id: number; label: string; description: string; status: string; date: string; time: string }) {
+    const { id, label, description, status, date, time } = data;
+    const dueDateTime = new Date(`${date}T${time}`);
+
+    try {
+      const task = await this.prisma.task.findUnique({
+        where: { id: id },
+      });
+
+      if (!task || task.userId !== userId) {
+        throw new Error('Invalid user or task not found');
+      }
+
+      return this.prisma.task.update({
+        where: { id: id },
+        data: {
+          itemLabel: label,
+          itemDescription: description,
+          dueDateTime: dueDateTime,
+          itemStatus: status,
+        },
+      });
+    } catch (error) {
+      throw new Error(`Error updating task: ${error.message}`);
+    }
+  }
 }

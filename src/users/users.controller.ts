@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Body,
   Request,
   UnauthorizedException,
   UseInterceptors,
@@ -55,6 +56,77 @@ export class UsersController {
       return res.json({ success: true, profilePictureUrl: result.profilePictureUrl });
     } else {
       return res.status(400).json({ success: false, message: 'Failed to update profile picture' });
+    }
+  }
+
+  @Post('createTask')
+  @UseGuards(JwtMiddleware)
+  async createTask(@Request() req, @Body() body) {
+    if (!req.user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const { label, description, status, date, time } = body;
+    if (!label || !description || !status || !date || !time) {
+      throw new Error('All fields are required');
+    }
+
+    const userId = req.user.id;
+    const task = await this.usersService.createTask(userId, body);
+    return task;
+  }
+
+  @Get('tasks')
+  @UseGuards(JwtMiddleware)
+  async getAllTasks(@Request() req) {
+    if (!req.user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const userId = req.user.id;
+    const tasks = await this.usersService.getAllTasks(userId);
+    return tasks;
+  }
+
+  @Post('deleteTask')
+  @UseGuards(JwtMiddleware)
+  async deleteTask(@Request() req, @Body() body) {
+    if (!req.user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const taskId = body.id;
+    if (!taskId) {
+      throw new Error('Task ID is required');
+    }
+
+    try {
+      const result = await this.usersService.deleteTask(taskId);
+      return result;
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+
+  @Post('updateTask')
+  @UseGuards(JwtMiddleware)
+  async updateTask(@Request() req, @Body() body) {
+    if (!req.user) {
+      throw new UnauthorizedException('Access denied');
+    }
+
+    const userId = req.user.id;
+    const { id, label, description, status, date, time } = body;
+
+    if (!id || !label || !description || !status || !date || !time) {
+      throw new Error('All fields are required');
+    }
+
+    try {
+      const result = await this.usersService.updateTask(userId, body);
+      return { status: 'success', task: result };
+    } catch (error) {
+      return { error: error.message };
     }
   }
 }
