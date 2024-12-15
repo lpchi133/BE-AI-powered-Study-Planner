@@ -59,7 +59,7 @@ export class UsersService {
     }
   }
 
-  async createTask(userId: number, data: { label: string; description: string; status: string; date: string; time: string }) {
+  async createTask(userId: number, data: { label: string; description: string; priority:string; status: string; date: string; time: string }) {
     console.log('Received data:', data);
     const dueDateTime = new Date(`${data.date}T${data.time}`);
     console.log('Parsed dueDateTime:', dueDateTime);
@@ -67,6 +67,7 @@ export class UsersService {
       data: {
         itemLabel: data.label,
         itemDescription: data.description,
+        itemPriority: data.priority,
         itemStatus: data.status,
         dueDateTime: dueDateTime,
         userId: userId,
@@ -91,24 +92,30 @@ export class UsersService {
     }
   }
 
-  async updateTask(userId: number, data: { id: number; label: string; description: string; status: string; date: string; time: string }) {
-    const { id, label, description, status, date, time } = data;
+  async updateTask(userId: number, data: { id: number; label: string; description: string; priority: string; status: string; date: string; time: string }) {
+    const { id, label, description, priority, status, date, time } = data;
+  
+    // Kiểm tra xem date và time có hợp lệ không
     const dueDateTime = new Date(`${date}T${time}`);
-
+    if (isNaN(dueDateTime.getTime())) {
+      throw new Error('Invalid date or time');
+    }
+  
     try {
       const task = await this.prisma.task.findUnique({
         where: { id: id },
       });
-
+  
       if (!task || task.userId !== userId) {
         throw new Error('Invalid user or task not found');
       }
-
+  
       return this.prisma.task.update({
         where: { id: id },
         data: {
           itemLabel: label,
           itemDescription: description,
+          itemPriority: priority,
           dueDateTime: dueDateTime,
           itemStatus: status,
         },
@@ -117,4 +124,5 @@ export class UsersService {
       throw new Error(`Error updating task: ${error.message}`);
     }
   }
+  
 }

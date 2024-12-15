@@ -26,6 +26,7 @@ model Task {
   id               Int      @id @default(autoincrement()) @unique
   itemLabel        String?  @db.VarChar(200)
   itemDescription  String?
+  itemPriority     String?
   itemStatus       String   @db.VarChar(200)
   dueDateTime      DateTime
   dateTimeSet      DateTime @default(now())
