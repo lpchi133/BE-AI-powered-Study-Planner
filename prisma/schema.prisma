@@ -19,4 +19,17 @@ model Users {
   name     String
   password String
   profilePicture String?
+  tasks Task[]
+}
+
+model Task {
+  id               Int      @id @default(autoincrement()) @unique
+  itemLabel        String?  @db.VarChar(200)
+  itemDescription  String?
+  itemStatus       String   @db.VarChar(200)
+  dueDateTime      DateTime
+  dateTimeSet      DateTime @default(now())
+  dateTimeModified DateTime @updatedAt
+  userId           Int
+  user             Users     @relation(fields: [userId], references: [id])
 }
