@@ -16,6 +16,7 @@ import { JwtMiddleware  } from '../middlewares/jwt.middleware';
 import { UsersService } from "./users.service";
 import { Express } from 'express';
 import * as multer from 'multer';
+import { format, toZonedTime  } from 'date-fns-tz';
 
 @Controller("users")
 export class UsersController {
@@ -66,8 +67,8 @@ export class UsersController {
       throw new UnauthorizedException('Access denied');
     }
 
-    const { label, description, status, date, time } = body;
-    if (!label || !description || !status || !date || !time) {
+    const { label, description, priority, status, start_date, start_time, date, time } = body;
+    if (!label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
       throw new Error('All fields are required');
     }
 
@@ -85,7 +86,20 @@ export class UsersController {
 
     const userId = req.user.id;
     const tasks = await this.usersService.getAllTasks(userId);
-    return tasks;
+
+    // Chuyển đổi `dueDateTime` sang giờ Việt Nam trước khi trả về
+    const timeZone = 'Asia/Ho_Chi_Minh';
+    const tasksWithVietnamTime = tasks.map(task => {
+      const vietnamTime = toZonedTime (task.dueDateTime, timeZone);
+      const vietnamTime1 = toZonedTime (task.dateTimeSet, timeZone);
+      return {
+        ...task,
+        dueDateTime: format(vietnamTime, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
+        dateTimeSet: format(vietnamTime1, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
+      };
+    });
+
+    return tasksWithVietnamTime;
   }
 
   @Post('deleteTask')
@@ -116,9 +130,9 @@ export class UsersController {
     }
 
     const userId = req.user.id;
-    const { id, label, description, status, date, time } = body;
+    const { id, label, description, priority, status, start_date, start_time, date, time  } = body;
 
-    if (!id || !label || !description || !status || !date || !time) {
+    if (!id || !label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
       throw new Error('All fields are required');
     }
 
