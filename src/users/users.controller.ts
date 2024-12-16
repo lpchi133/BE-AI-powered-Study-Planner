@@ -67,8 +67,8 @@ export class UsersController {
       throw new UnauthorizedException('Access denied');
     }
 
-    const { label, description, priority, status, date, time } = body;
-    if (!label || !description || !priority || !status || !date || !time) {
+    const { label, description, priority, status, start_date, start_time, date, time } = body;
+    if (!label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
       throw new Error('All fields are required');
     }
 
@@ -91,9 +91,11 @@ export class UsersController {
     const timeZone = 'Asia/Ho_Chi_Minh';
     const tasksWithVietnamTime = tasks.map(task => {
       const vietnamTime = toZonedTime (task.dueDateTime, timeZone);
+      const vietnamTime1 = toZonedTime (task.dateTimeSet, timeZone);
       return {
         ...task,
         dueDateTime: format(vietnamTime, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
+        dateTimeSet: format(vietnamTime1, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
       };
     });
 
@@ -128,9 +130,9 @@ export class UsersController {
     }
 
     const userId = req.user.id;
-    const { id, label, description, priority, status, date, time } = body;
+    const { id, label, description, priority, status, start_date, start_time, date, time  } = body;
 
-    if (!id || !label || !description || !priority || !status || !date || !time) {
+    if (!id || !label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
       throw new Error('All fields are required');
     }
 

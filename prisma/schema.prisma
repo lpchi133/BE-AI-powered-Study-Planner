@@ -29,7 +29,7 @@ model Task {
   itemPriority     String?
   itemStatus       String   @db.VarChar(200)
   dueDateTime      DateTime
-  dateTimeSet      DateTime @default(now())
+  dateTimeSet      DateTime 
   dateTimeModified DateTime @updatedAt
   userId           Int
   user             Users     @relation(fields: [userId], references: [id])

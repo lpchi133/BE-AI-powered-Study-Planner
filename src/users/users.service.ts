@@ -59,16 +59,17 @@ export class UsersService {
     }
   }
 
-  async createTask(userId: number, data: { label: string; description: string; priority:string; status: string; date: string; time: string }) {
-    console.log('Received data:', data);
+  async createTask(userId: number, data: { label: string; description: string; priority:string; status: string; start_date: string; start_time: string; date: string; time: string }) {
+    const dateTimeSet = new Date(`${data.start_date}T${data.start_time}`);
     const dueDateTime = new Date(`${data.date}T${data.time}`);
-    console.log('Parsed dueDateTime:', dueDateTime);
+
     return this.prisma.task.create({
       data: {
         itemLabel: data.label,
         itemDescription: data.description,
         itemPriority: data.priority,
         itemStatus: data.status,
+        dateTimeSet: dateTimeSet,
         dueDateTime: dueDateTime,
         userId: userId,
       },
@@ -92,12 +93,14 @@ export class UsersService {
     }
   }
 
-  async updateTask(userId: number, data: { id: number; label: string; description: string; priority: string; status: string; date: string; time: string }) {
-    const { id, label, description, priority, status, date, time } = data;
+  async updateTask(userId: number, data: { id: number; label: string; description: string; priority: string; status: string; start_date: string; start_time: string; date: string; time: string }) {
+    const { id, label, description, priority, status, start_date, start_time, date, time } = data;
   
     // Kiểm tra xem date và time có hợp lệ không
     const dueDateTime = new Date(`${date}T${time}`);
-    if (isNaN(dueDateTime.getTime())) {
+    const dateTimeSet = new Date(`${start_date}T${start_time}`);
+
+    if (isNaN(dueDateTime.getTime()) && isNaN(dateTimeSet.getTime())) {
       throw new Error('Invalid date or time');
     }
   
@@ -116,6 +119,7 @@ export class UsersService {
           itemLabel: label,
           itemDescription: description,
           itemPriority: priority,
+          dateTimeSet: dateTimeSet,
           dueDateTime: dueDateTime,
           itemStatus: status,
         },
