@@ -80,32 +80,41 @@ export class TasksService {
     const task = await this.prisma.task.findFirst({
       where: { id, userId },
     });
-  
+
     if (!task) {
       throw new Error('Task not found or you do not have permission to update this task');
     }
-  
+
     //Get start_time and time from old data
     const start_time = task.dateTimeSet ? task.dateTimeSet.toISOString().split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dateTimeSet
     const time = task.dueDateTime ? task.dueDateTime.toISOString().split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dueDateTime
-  
+
     // Convert start_date and date to complete time (including time)
     const updatedDateTimeSet = new Date(`${start_date}T${start_time}`);
     const updatedDueDateTime = new Date(`${date}T${time}`);
-  
+
     if (isNaN(updatedDateTimeSet.getTime()) || isNaN(updatedDueDateTime.getTime())) {
       throw new Error('Invalid date');
     }
-  
+
+    // Check if dueDateTime is in the past, and update status if needed
+    const currentTime = new Date();
+    let taskStatus = task.itemStatus; // Default to current task status
+
+    if (updatedDueDateTime < currentTime) {
+      taskStatus = 'Overdue';  // Update status to "overdue" if due date has passed
+    }
+
     const updatedTask = await this.prisma.task.update({
       where: { id },
       data: {
-        dueDateTime: updatedDueDateTime,   // Cập nhật dueDateTime
-        dateTimeSet: updatedDateTimeSet,   // Cập nhật dateTimeSet
+        dueDateTime: updatedDueDateTime,  
+        dateTimeSet: updatedDateTimeSet,
+        itemStatus: taskStatus,
       },
     });
-  
+
     return updatedTask;
   }
-  
+
 }
