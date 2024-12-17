@@ -84,8 +84,8 @@ export class TasksService {
     }
 
     // Get start_time and time from old data
-    const start_time = task.dateTimeSet ? task.dateTimeSet.split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dateTimeSet
-    const time = task.dueDateTime ? task.dueDateTime.split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dueDateTime
+    const start_time = task.dateTimeSet ? task.dateTimeSet.toISOString().split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dateTimeSet
+    const time = task.dueDateTime ? task.dueDateTime.toISOString().split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dueDateTime
 
     // Combine start_date and start_time, date and time into complete datetime strings
     const updatedDateTimeSet = `${start_date}T${start_time}:00`;
