@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Task" ALTER COLUMN "dueDateTime" SET DATA TYPE TEXT,
+ALTER COLUMN "dateTimeSet" SET DATA TYPE TEXT;

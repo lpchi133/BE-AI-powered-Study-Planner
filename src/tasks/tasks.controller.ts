@@ -1,7 +1,6 @@
 import { Controller, Post, UseGuards, Request, Body, UnauthorizedException, Get } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { JwtMiddleware } from 'src/middlewares/jwt.middleware';
-import { format, toZonedTime  } from 'date-fns-tz';
 
 @Controller('tasks')
 export class TasksController {
@@ -30,23 +29,11 @@ export class TasksController {
       if (!req.user) {
         throw new UnauthorizedException('Access denied');
       }
-  
+
       const userId = req.user.id;
       const tasks = await this.tasksService.getAllTasks(userId);
-  
-      // Chuyển đổi `dueDateTime` sang giờ Việt Nam trước khi trả về
-      const timeZone = 'Asia/Ho_Chi_Minh';
-      const tasksWithVietnamTime = tasks.map(task => {
-        const vietnamTime = toZonedTime (task.dueDateTime, timeZone);
-        const vietnamTime1 = toZonedTime (task.dateTimeSet, timeZone);
-        return {
-          ...task,
-          dueDateTime: format(vietnamTime, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
-          dateTimeSet: format(vietnamTime1, "yyyy-MM-dd'T'HH:mm:ssXXX", { timeZone }),
-        };
-      });
-  
-      return tasksWithVietnamTime;
+
+      return tasks;
     }
   
     @Post('deleteTask')
