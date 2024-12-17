@@ -12,18 +12,26 @@ export class TasksService {
     const dateTimeSet = toZonedTime(`${data.start_date}T${data.start_time}`, timeZone);
     const dueDateTime = toZonedTime(`${data.date}T${data.time}`, timeZone);
 
+    // Adjusting for Vietnam timezone (UTC+7)
+    const vietnamOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+    const localDateTimeSet = new Date(dateTimeSet.getTime() + vietnamOffset);
+    const localDueDateTime = new Date(dueDateTime.getTime() + vietnamOffset);
+
+    console.log('localDateTimeSet:', localDateTimeSet);
+    console.log('localDueDateTime:', localDueDateTime);
+
     return this.prisma.task.create({
-      data: {
-        itemLabel: data.label,
-        itemDescription: data.description,
-        itemPriority: data.priority,
-        itemStatus: data.status,
-        dateTimeSet: dateTimeSet,
-        dueDateTime: dueDateTime,
-        userId: userId,
-      },
+        data: {
+            itemLabel: data.label,
+            itemDescription: data.description,
+            itemPriority: data.priority,
+            itemStatus: data.status,
+            dateTimeSet: localDateTimeSet,
+            dueDateTime: localDueDateTime,
+            userId: userId,
+        },
     });
-  }
+}
 
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
@@ -50,7 +58,12 @@ export class TasksService {
     const dateTimeSet = toZonedTime(`${start_date}T${start_time}:00`, timeZone);
     const dueDateTime = toZonedTime(`${date}T${time}:00`, timeZone);
 
-    if (isNaN(dueDateTime.getTime()) && isNaN(dateTimeSet.getTime())) {
+    // Adjusting for Vietnam timezone (UTC+7)
+    const vietnamOffset = 7 * 60 * 60 * 1000; // 7 hours in milliseconds
+    const localDateTimeSet = new Date(dateTimeSet.getTime() + vietnamOffset);
+    const localDueDateTime = new Date(dueDateTime.getTime() + vietnamOffset);
+
+    if (isNaN(localDateTimeSet.getTime()) && isNaN(localDueDateTime.getTime())) {
       throw new Error('Invalid date or time');
     }
 
@@ -71,8 +84,8 @@ export class TasksService {
           itemLabel: label,
           itemDescription: description,
           itemPriority: priority,
-          dateTimeSet: dateTimeSet,
-          dueDateTime: dueDateTime,
+          dateTimeSet: localDateTimeSet,
+          dueDateTime: localDueDateTime,
           itemStatus: status,
         },
       });
