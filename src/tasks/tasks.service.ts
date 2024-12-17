@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { toZonedTime } from 'date-fns-tz';
 
 @Injectable()
 export class TasksService {
   constructor(private prisma: PrismaService) { }
 
   async createTask(userId: number, data: { label: string; description: string; priority: string; status: string; start_date: string; start_time: string; date: string; time: string }) {
-    const dateTimeSet = new Date(`${data.start_date}T${data.start_time}`);
-    const dueDateTime = new Date(`${data.date}T${data.time}`);
+
+    const timeZone = 'Asia/Ho_Chi_Minh';
+    const dateTimeSet = toZonedTime(`${data.start_date}T${data.start_time}`, timeZone);
+    const dueDateTime = toZonedTime(`${data.date}T${data.time}`, timeZone);
 
     return this.prisma.task.create({
       data: {
@@ -43,8 +46,9 @@ export class TasksService {
     const { id, label, description, priority, status, start_date, start_time, date, time } = data;
 
     // Kiểm tra xem date và time có hợp lệ không
-    const dueDateTime = new Date(`${date}T${time}`);
-    const dateTimeSet = new Date(`${start_date}T${start_time}`);
+    const timeZone = 'Asia/Ho_Chi_Minh';
+    const dateTimeSet = toZonedTime(`${start_date}T${start_time}:00`, timeZone);
+    const dueDateTime = toZonedTime(`${date}T${time}:00`, timeZone);
 
     if (isNaN(dueDateTime.getTime()) && isNaN(dateTimeSet.getTime())) {
       throw new Error('Invalid date or time');
@@ -58,6 +62,8 @@ export class TasksService {
       if (!task || task.userId !== userId) {
         throw new Error('Invalid user or task not found');
       }
+
+
 
       return this.prisma.task.update({
         where: { id: id },
@@ -90,8 +96,9 @@ export class TasksService {
     const time = task.dueDateTime ? task.dueDateTime.toISOString().split('T')[1].slice(0, 5) : '00:00';  // Lấy thời gian từ dueDateTime
 
     // Convert start_date and date to complete time (including time)
-    const updatedDateTimeSet = new Date(`${start_date}T${start_time}`);
-    const updatedDueDateTime = new Date(`${date}T${time}`);
+    const timeZone = 'Asia/Ho_Chi_Minh';
+    const updatedDateTimeSet = toZonedTime(`${start_date}T${start_time}:00`, timeZone);
+    const updatedDueDateTime = toZonedTime(`${date}T${time}:00`, timeZone);
 
     if (isNaN(updatedDateTimeSet.getTime()) || isNaN(updatedDueDateTime.getTime())) {
       throw new Error('Invalid date');
@@ -108,7 +115,7 @@ export class TasksService {
     const updatedTask = await this.prisma.task.update({
       where: { id },
       data: {
-        dueDateTime: updatedDueDateTime,  
+        dueDateTime: updatedDueDateTime,
         dateTimeSet: updatedDateTimeSet,
         itemStatus: taskStatus,
       },
