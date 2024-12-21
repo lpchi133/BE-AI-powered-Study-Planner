@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Express } from 'express';
 import cloudinary from '../cloudinary/cloudinary.config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -11,7 +12,7 @@ export class UsersService {
     return this.prisma.users.findUnique({ where: { email } });
   }
 
-  async createUser(data: { email: string; name: string; password: string }) {
+  async createUser(data: { email: string; name: string; password: string; checkAccountGG: string }) {
     return this.prisma.users.create({ data });
   }
 
@@ -23,6 +24,7 @@ export class UsersService {
         name: true,
         email: true,
         profilePicture: true,
+        checkAccountGG: true,
       },
     });
   }
@@ -57,6 +59,59 @@ export class UsersService {
     } catch (error) {
       console.error('Error uploading to Cloudinary:', error);
       return { success: false };
+    }
+  }
+
+  async updateUser(userId: number, data: { name?: string; email?: string }): Promise<{ success: boolean }> {
+    try {
+      await this.prisma.users.update({
+        where: { id: userId },
+        data,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      return { success: false };
+    }
+  }
+
+  async changePassword(userId: number, currentPassword: string, newPassword: string): Promise<{ success: boolean, message?: string }> {
+    try {
+      const user = await this.prisma.users.findUnique({ where: { id: userId } });
+  
+      if (!user) {
+        return { success: false, message: 'User not found' };
+      }
+  
+      if (user.checkAccountGG === 'yes') {
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        await this.prisma.users.update({
+          where: { id: userId },
+          data: { password: hashedNewPassword, checkAccountGG: null },
+        });
+  
+        return { success: true };
+      }
+  
+      const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!passwordMatch) {
+        return { success: false, message: 'Current password is incorrect' };
+      }
+  
+      if (currentPassword === newPassword) {
+        return { success: false, message: 'New password cannot be the same as the current password' };
+      }
+  
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+      await this.prisma.users.update({
+        where: { id: userId },
+        data: { password: hashedNewPassword },
+      });
+  
+      return { success: true };
+    } catch (error) {
+      console.error('Error changing password:', error);
+      return { success: false, message: 'Error changing password' };
     }
   }
 }

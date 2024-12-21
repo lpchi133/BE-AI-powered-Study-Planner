@@ -31,6 +31,7 @@ export class AuthService {
       email: dto.email,
       name: dto.name,
       password: hashedPassword,
+      checkAccountGG: dto.checkAccountGG,
     });
 
     return { message: "Registration successful!", newUser: user };

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Request,
   UnauthorizedException,
   UseInterceptors,
@@ -9,6 +10,7 @@ import {
   Res,
   UseGuards,
   Req,
+  Body,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtMiddleware  } from '../middlewares/jwt.middleware';
@@ -55,6 +57,34 @@ export class UsersController {
       return res.json({ success: true, profilePictureUrl: result.profilePictureUrl });
     } else {
       return res.status(400).json({ success: false, message: 'Failed to update profile picture' });
+    }
+  }
+
+  @Put('update')
+  @UseGuards(JwtMiddleware)
+  async updateUser(@Req() req, @Body() body, @Res() res) {
+    const userId = req.user.id;
+    const { name, email } = body;
+
+    const result = await this.usersService.updateUser(userId, { name, email });
+    if (result.success) {
+      return res.json({ success: true });
+    } else {
+      return res.status(400).json({ success: false, message: 'Failed to update user data' });
+    }
+  }
+
+  @Put('changePassword')
+  @UseGuards(JwtMiddleware)
+  async changePassword(@Req() req, @Body() body, @Res() res) {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = body;
+
+    const result = await this.usersService.changePassword(userId, currentPassword, newPassword);
+    if (result.success) {
+      return res.json({ success: true });
+    } else {
+      return res.status(400).json({ success: false, message: result.message });
     }
   }
 }
