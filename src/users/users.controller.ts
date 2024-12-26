@@ -39,12 +39,12 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor("profilePicture", {
       storage: multer.memoryStorage(), // Sử dụng bộ nhớ trong bộ nhớ
-    })
+    }),
   )
   async changeProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
-    @Res() res
+    @Res() res,
   ) {
     if (!file) {
       return res
@@ -98,7 +98,7 @@ export class UsersController {
     const result = await this.usersService.changePassword(
       userId,
       currentPassword,
-      newPassword
+      newPassword,
     );
     if (result.success) {
       return res.json({ success: true });

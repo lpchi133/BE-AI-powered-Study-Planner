@@ -24,7 +24,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     _accessToken: string,
     _refreshToken: string,
     profile: any,
-    done: VerifyCallback
+    done: VerifyCallback,
   ): Promise<any> {
     const { id, name, emails } = profile;
     const hashedPassword = await bcrypt.hash(id, 10);
