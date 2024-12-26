@@ -23,9 +23,7 @@ export class AiSuggestionService {
         `;
 
         const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const generatedText = await response.text();
 
-        return generatedText;
+        return result.response.text();
     }
 }

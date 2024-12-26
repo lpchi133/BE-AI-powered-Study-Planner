@@ -13,11 +13,10 @@ export class TasksController {
         throw new UnauthorizedException('Access denied');
       }
   
-      const { label, description, priority, status, start_date, start_time, date, time } = body;
-      if (!label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
+      const { itemLabel, itemPriority, itemStatus, dateTimeSet, dueDateTime } = body;
+      if (!itemLabel  || !itemPriority || !itemStatus || !dateTimeSet || !dueDateTime) {
         throw new Error('All fields are required');
       }
-  
       const userId = req.user.id;
       const task = await this.tasksService.createTask(userId, body);
       return task;
@@ -64,9 +63,8 @@ export class TasksController {
       }
   
       const userId = req.user.id;
-      const { id, label, description, priority, status, start_date, start_time, date, time  } = body;
-  
-      if (!id || !label || !description || !priority || !status || !start_date || !start_time || !date || !time) {
+      const { itemLabel, itemPriority, itemStatus, dateTimeSet, dueDateTime } = body;
+      if (!itemLabel  || !itemPriority || !itemStatus || !dateTimeSet || !dueDateTime) {
         throw new Error('All fields are required');
       }
   
@@ -74,7 +72,7 @@ export class TasksController {
         const result = await this.tasksService.updateTask(userId, body);
         return { status: 'success', task: result };
       } catch (error) {
-        return { error: error.message };
+         return { error: error.message };
       }
     }
 
@@ -86,15 +84,15 @@ export class TasksController {
       }
     
       const userId = req.user.id;
-      const { id, start_date, date } = body;
+      const { id, dateTimeSet, dueDateTime } = body;
     
       // Kiểm tra các trường bắt buộc
-      if (!id || !start_date || !date) {
+      if (!id || !dateTimeSet || !dueDateTime) {
         throw new Error('Task ID, start date, and date are required');
       }
     
       try {
-        const updatedTask = await this.tasksService.updateTimeTask(userId, id, start_date, date);
+        const updatedTask = await this.tasksService.updateTimeTask(userId, id, dateTimeSet, dueDateTime);
         return { status: 'success', task: updatedTask };
       } catch (error) {
         return { error: error.message };
