@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { Express } from "express";
 import cloudinary from "../cloudinary/cloudinary.config";
 import * as bcrypt from "bcrypt";
 
@@ -35,7 +36,7 @@ export class UsersService {
 
   async updateProfilePicture(
     userId: number,
-    file: Express.Multer.File,
+    file: Express.Multer.File
   ): Promise<{ success: boolean; profilePictureUrl?: string }> {
     try {
       const result = await new Promise((resolve, reject) => {
@@ -50,7 +51,7 @@ export class UsersService {
             } else {
               resolve(result);
             }
-          },
+          }
         );
         uploadStream.end(file.buffer);
       });
@@ -70,7 +71,7 @@ export class UsersService {
   }
   async updateUser(
     userId: number,
-    data: { name?: string; email?: string },
+    data: { name?: string; email?: string }
   ): Promise<{ success: boolean }> {
     try {
       await this.prisma.users.update({
@@ -86,7 +87,7 @@ export class UsersService {
   async changePassword(
     userId: number,
     currentPassword: string,
-    newPassword: string,
+    newPassword: string
   ): Promise<{ success: boolean; message?: string }> {
     try {
       const user = await this.prisma.users.findUnique({
@@ -109,7 +110,7 @@ export class UsersService {
 
       const passwordMatch = await bcrypt.compare(
         currentPassword,
-        user.password,
+        user.password
       );
       if (!passwordMatch) {
         return { success: false, message: "Current password is incorrect" };

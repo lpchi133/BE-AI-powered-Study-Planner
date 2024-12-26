@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Request,
   UnauthorizedException,
   UseInterceptors,
@@ -9,7 +10,6 @@ import {
   Res,
   UseGuards,
   Req,
-  Put,
   Body,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -39,12 +39,12 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor("profilePicture", {
       storage: multer.memoryStorage(), // Sử dụng bộ nhớ trong bộ nhớ
-    }),
+    })
   )
   async changeProfilePicture(
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
-    @Res() res,
+    @Res() res
   ) {
     if (!file) {
       return res
@@ -72,11 +72,13 @@ export class UsersController {
         .json({ success: false, message: "Failed to update profile picture" });
     }
   }
+
   @Put("update")
   @UseGuards(JwtMiddleware)
   async updateUser(@Req() req, @Body() body, @Res() res) {
     const userId = req.user.id;
     const { name, email } = body;
+
     const result = await this.usersService.updateUser(userId, { name, email });
     if (result.success) {
       return res.json({ success: true });
@@ -86,15 +88,17 @@ export class UsersController {
         .json({ success: false, message: "Failed to update user data" });
     }
   }
+
   @Put("changePassword")
   @UseGuards(JwtMiddleware)
   async changePassword(@Req() req, @Body() body, @Res() res) {
     const userId = req.user.id;
     const { currentPassword, newPassword } = body;
+
     const result = await this.usersService.changePassword(
       userId,
       currentPassword,
-      newPassword,
+      newPassword
     );
     if (result.success) {
       return res.json({ success: true });
