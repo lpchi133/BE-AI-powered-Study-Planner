@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import * as moment from "moment";
 import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
@@ -23,8 +22,8 @@ export class TasksService {
         itemDescription: data.itemDescription,
         itemPriority: data.itemPriority,
         itemStatus: data.itemStatus,
-        dateTimeSet: moment(data.dateTimeSet).toISOString(),
-        dueDateTime: moment(data.dueDateTime).toISOString(),
+        dateTimeSet: new Date(data.dateTimeSet).toISOString(),
+        dueDateTime: new Date(data.dueDateTime).toISOString(),
         userId: userId,
       },
     });
