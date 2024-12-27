@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import * as moment from 'moment';
 
 @Injectable()
 export class TasksService {
@@ -16,18 +17,28 @@ export class TasksService {
       dueDateTime: string;
     },
   ) {
+    // Chuyển đổi dateTimeSet và dueDateTime thành ISO và in ra console
+    const formattedStartDate = moment(data.dateTimeSet, "YYYY-MM-DDTHH:mm").format("YYYY-MM-DDTHH:mm");
+  const formattedDueDate = moment(data.dueDateTime, "YYYY-MM-DDTHH:mm").format("YYYY-MM-DDTHH:mm");
+  
+    // In ra giá trị dateTimeSet và dueDateTime
+    console.log('Formatted Start Date:', formattedStartDate);
+    console.log('Formatted Due Date:', formattedDueDate);
+  
+    // Tạo task mới và lưu vào cơ sở dữ liệu
     return this.prisma.task.create({
       data: {
         itemLabel: data.itemLabel,
         itemDescription: data.itemDescription,
         itemPriority: data.itemPriority,
         itemStatus: data.itemStatus,
-        dateTimeSet: new Date(data.dateTimeSet).toISOString(),
-        dueDateTime: new Date(data.dueDateTime).toISOString(),
+        dateTimeSet: formattedStartDate,  // Chuyển sang ISO string
+        dueDateTime: formattedDueDate,  // Chuyển sang ISO string
         userId: userId,
       },
     });
   }
+  
 
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
