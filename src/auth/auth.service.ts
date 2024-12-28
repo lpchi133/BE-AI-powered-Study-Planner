@@ -9,14 +9,16 @@ import { Users } from "@prisma/client";
 export class AuthService {
   constructor(
     private userService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
   generateJwt(payload) {
     return this.jwtService.sign(payload);
   }
 
-  async register(dto: RegisterUserDto): Promise<{ message: string, newUser: Users }> {
+  async register(
+    dto: RegisterUserDto,
+  ): Promise<{ message: string; newUser: Users }> {
     // Check if username or email already exists by calling UserService
     const existingUser = await this.userService.findByEmail(dto.email);
 
@@ -57,6 +59,7 @@ export class AuthService {
   }
 
   async login(user: { email: string; password: string }) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _pass, ...payload } = user;
     return { accessToken: this.jwtService.sign(payload) };
   }

@@ -24,7 +24,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     _accessToken: string,
     _refreshToken: string,
     profile: any,
-    done: VerifyCallback
+    done: VerifyCallback,
   ): Promise<any> {
     const { id, name, emails } = profile;
     const hashedPassword = await bcrypt.hash(id, 10);
@@ -32,7 +32,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       email: emails[0].value,
       name: `${name.givenName} ${name.familyName}`,
       password: hashedPassword,
-      checkAccountGG: 'yes',
+      checkAccountGG: true,
     });
 
     done(null, user);

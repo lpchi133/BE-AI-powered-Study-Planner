@@ -19,7 +19,7 @@ model Users {
   name     String
   password String
   profilePicture String?
-  checkAccountGG String?
+  checkAccountGG Boolean?
   tasks Task[]
 }
 
