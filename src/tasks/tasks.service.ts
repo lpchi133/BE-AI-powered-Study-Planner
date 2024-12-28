@@ -132,4 +132,14 @@ export class TasksService {
 
     return updatedTask;
   }
+  async updateTaskStatus(taskId: number, itemStatus: string) {
+    try {
+      return await this.prisma.task.update({
+        where: { id: taskId },
+        data: { itemStatus },
+      });
+    } catch (error) {
+      throw new Error(`Error updating task status: ${error.message}`);
+    }
+  }
 }

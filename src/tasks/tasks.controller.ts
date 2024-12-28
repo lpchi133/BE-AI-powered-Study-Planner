@@ -125,4 +125,24 @@ export class TasksController {
       return { error: error.message };
     }
   }
+
+  @Post("updateTaskStatus")
+  @UseGuards(JwtMiddleware)
+  async updateTaskStatus(@Request() req, @Body() body) {
+    if (!req.user) {
+      throw new UnauthorizedException("Access denied");
+    }
+
+    const { id, itemStatus } = body;
+    if (!id || !itemStatus) {
+      throw new Error("Task ID and status are required");
+    }
+
+    try {
+      const result = await this.tasksService.updateTaskStatus(id, itemStatus);
+      return { status: "success", task: result };
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
 }
