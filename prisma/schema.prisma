@@ -34,4 +34,18 @@ model Task {
   dateTimeModified DateTime @updatedAt
   userId           Int
   user             Users     @relation(fields: [userId], references: [id])
+  focusSessions   FocusSession[]
+  focusTime       Int?    
+  breakTime       Int? 
+}
+
+model FocusSession {
+  id              Int      @id @default(autoincrement())
+  taskId          Int
+  duration        Int      // Session duration in minutes
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  task            Task     @relation(fields: [taskId], references: [id])
 }
