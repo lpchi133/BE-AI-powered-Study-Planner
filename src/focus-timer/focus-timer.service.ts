@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import moment from "moment";
+import moment from "moment-timezone";
 
 @Injectable()
 export class FocusTimerService {
@@ -18,7 +18,7 @@ export class FocusTimerService {
             data: { focusTime, breakTime },
         });
 
-        const startedAt = moment().format("YYYY-MM-DDTHH:mm");
+        const startedAt = moment().tz('Asia/Ho_Chi_Minh').format("YYYY-MM-DDTHH:mm");
 
         const focusSession = await this.prisma.focusSession.create({
             data: {
