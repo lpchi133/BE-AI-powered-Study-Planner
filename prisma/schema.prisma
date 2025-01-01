@@ -35,14 +35,14 @@ model Task {
   userId           Int
   user             Users     @relation(fields: [userId], references: [id])
   focusSessions   FocusSession[]
-  focusTime       Int?    
-  breakTime       Int? 
+  focusTime       Int?    //minutes
+  breakTime       Int?  //minutes
 }
 
 model FocusSession {
   id              Int      @id @default(autoincrement())
   taskId          Int
-  duration        Int      // Session duration in minutes
+  duration        Int      // Session duration in seconds
   startedAt       String
   endedAt         String?
   createdAt       DateTime @default(now())
