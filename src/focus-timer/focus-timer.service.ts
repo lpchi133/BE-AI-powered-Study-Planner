@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import moment from "moment";
 
 @Injectable()
 export class FocusTimerService {
@@ -17,10 +18,13 @@ export class FocusTimerService {
             data: { focusTime, breakTime },
         });
 
+        const startedAt = moment().format("YYYY-MM-DDTHH:mm");
+
         const focusSession = await this.prisma.focusSession.create({
             data: {
                 taskId,
                 duration: 0,
+                startedAt,
             },
         });
 
@@ -33,7 +37,7 @@ export class FocusTimerService {
 
         if (!session) throw new NotFoundException('Session not found');
 
-        const endTime = new Date();
+        const endTime = moment().format("YYYY-MM-DDTHH:mm");
 
         await this.prisma.focusSession.update({
             where: { id: sessionId },
