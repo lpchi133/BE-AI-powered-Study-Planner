@@ -37,7 +37,7 @@ export class FocusTimerService {
 
         if (!session) throw new NotFoundException('Session not found');
 
-        const endTime = moment().format("YYYY-MM-DDTHH:mm");
+        const endTime = moment().tz('Asia/Ho_Chi_Minh').format("YYYY-MM-DDTHH:mm");
 
         await this.prisma.focusSession.update({
             where: { id: sessionId },
