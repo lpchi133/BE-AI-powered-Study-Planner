@@ -36,14 +36,24 @@ export class TasksService {
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
       where: { userId: userId },
+      include: {
+        focusSessions: true, // Include the focusSessions relation
+      },
     });
   }
 
   async deleteTask(taskId: number) {
     try {
+      // Xóa tất cả các phiên tập trung liên quan đến nhiệm vụ
+      await this.prisma.focusSession.deleteMany({
+        where: { taskId: taskId },
+      });
+  
+      // Sau đó xóa nhiệm vụ
       await this.prisma.task.delete({
         where: { id: taskId },
       });
+  
       return { status: "success" };
     } catch (error) {
       throw new Error(`Error deleting task: ${error.message}`);
@@ -117,10 +127,15 @@ export class TasksService {
     const currentTime = new Date();
     let taskStatus = task.itemStatus; // Default to current task status
 
-    if (new Date(updatedDueDateTime) < currentTime) {
-      taskStatus = "Overdue"; // Update status to "overdue" if due date has passed
+    if (taskStatus !== "Completed") {
+      if (new Date(updatedDueDateTime) < currentTime) {
+        taskStatus = "Overdue"; // Update status to "overdue" if due date has passed
+      } else if (new Date(updatedDateTimeSet) > currentTime) {
+        taskStatus = "Not Started";
+      } else {
+        taskStatus = "OnGoing";
+      }
     }
-
     const updatedTask = await this.prisma.task.update({
       where: { id },
       data: {
