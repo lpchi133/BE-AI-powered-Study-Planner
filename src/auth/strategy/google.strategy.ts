@@ -33,6 +33,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       name: `${name.givenName} ${name.familyName}`,
       password: hashedPassword,
       checkAccountGG: true,
+      isActive: true,
     });
 
     done(null, user);

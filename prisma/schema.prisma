@@ -20,6 +20,8 @@ model Users {
   password String
   profilePicture String?
   checkAccountGG Boolean?
+  activationToken  String? 
+  isActive         Boolean  @default(false)
   tasks Task[]
 }
 

@@ -21,4 +21,8 @@ export class RegisterUserDto {
   @IsOptional()
   @IsBoolean()
   checkAccountGG?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 }
