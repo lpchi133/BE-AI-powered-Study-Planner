@@ -27,6 +27,6 @@ export class MailService {
             html: `<p>You requested a password reset. Click the link below to reset your password:</p><p><a href="${resetLink}">Reset Password</a></p>`,
         };
 
-        console.log(await this.transporter.sendMail(mailOptions));
+        return await this.transporter.sendMail(mailOptions);
     }
 }
