@@ -88,7 +88,7 @@ export class AuthService {
     const { password: _pass, ...payload } = user;
     const accessToken = this.jwtService.sign(payload);
     //generate pw reset link
-    return (await this.mailService.sendPasswordResetEmail(email, accessToken));
+    await this.mailService.sendPasswordResetEmail(email, accessToken);
 
     return { message: "Email sent." };
   }
