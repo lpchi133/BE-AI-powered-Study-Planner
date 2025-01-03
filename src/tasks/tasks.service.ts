@@ -70,29 +70,53 @@ export class TasksService {
       itemStatus: string;
       dateTimeSet: string;
       dueDateTime: string;
+      focusSessions?: any[]; // Optional
     },
   ) {
-    const { id, ...rest } = data;
-
+    const { id, focusSessions, ...rest } = data;
+  
+    console.log("Update data:", rest);
+  
     try {
       const task = await this.prisma.task.findUnique({
-        where: { id: id },
+        where: { id },
       });
-
-      if (!task || task.userId !== userId) {
-        throw new Error("Invalid user or task not found");
+  
+      if (!task) {
+        throw new Error("Task not found");
       }
-
-      return this.prisma.task.update({
-        where: { id: id },
-        data: {
-          ...rest,
-        },
+  
+      if (task.userId !== userId) {
+        throw new Error("Invalid user");
+      }
+  
+      const updatedTaskData: any = { ...rest };
+  
+      if (focusSessions && focusSessions.length > 0) {
+        updatedTaskData.focusSessions = {
+          update: focusSessions.map((session) => ({
+            where: { id: session.id }, // Assuming each session has an `id`
+            data: session, // Adjust this based on how you want to update the session
+          })),
+        };
+      }
+  
+      const updatedTask = await this.prisma.task.update({
+        where: { id },
+        data: updatedTaskData,
       });
+  
+      console.log("Updated task:", updatedTask);
+      return updatedTask;
     } catch (error) {
+      console.error("Error during task update:", {
+        message: error.message,
+        stack: error.stack,
+      });
       throw new Error(`Error updating task: ${error.message}`);
     }
   }
+  
 
   async updateTimeTask(
     userId: number,
