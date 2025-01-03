@@ -3,6 +3,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { Express } from "express";
 import cloudinary from "../cloudinary/cloudinary.config";
 import * as bcrypt from "bcrypt";
+import { Users } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
@@ -17,8 +18,25 @@ export class UsersService {
     name: string;
     password: string;
     checkAccountGG: boolean;
+    activationToken: string;
+    isActive: boolean;
   }) {
     return this.prisma.users.create({ data });
+  }
+
+  async findByActivationToken(token: string): Promise<Users | null> {
+    return this.prisma.users.findFirst({
+      where: {
+        activationToken: token,  // activationToken là trường hợp này
+      },
+    });
+  }
+  
+  async activateUser(userId: number): Promise<void> {
+    await this.prisma.users.update({
+      where: { id: userId },
+      data: { isActive: true, activationToken: null },
+    });
   }
 
   async getUserProfile(userId: number) {

@@ -10,6 +10,7 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  Query,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { config } from "dotenv";
@@ -71,5 +72,11 @@ export class AuthController {
       resetPwDto.newPassword,
       resetPwDto.token,
     );
+  }
+
+  @Get("activate")
+  async activateAccount(@Query('token') token: string) {
+    await this.authService.activateAccount(token);
+    return { message: 'Account activated successfully!' };
   }
 }

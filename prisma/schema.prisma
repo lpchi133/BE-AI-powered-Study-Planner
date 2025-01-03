@@ -20,6 +20,8 @@ model Users {
   password String
   profilePicture String?
   checkAccountGG Boolean?
+  activationToken  String? 
+  isActive         Boolean  @default(false)
   tasks Task[]
 }
 
@@ -34,7 +36,7 @@ model Task {
   dateTimeModified DateTime @updatedAt
   userId           Int
   user             Users     @relation(fields: [userId], references: [id])
-  focusSessions   FocusSession[]
+  focusSessions    FocusSession[]
   focusTime       Int?    //minutes
   breakTime       Int?  //minutes
 }
