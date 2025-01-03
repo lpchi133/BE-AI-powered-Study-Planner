@@ -92,11 +92,19 @@ export class TasksService {
   
       const updatedTaskData: any = { ...rest };
   
+      // Handle updating focus sessions if provided
       if (focusSessions && focusSessions.length > 0) {
         updatedTaskData.focusSessions = {
           update: focusSessions.map((session) => ({
             where: { id: session.id }, // Assuming each session has an `id`
-            data: session, // Adjust this based on how you want to update the session
+            data: {
+              itemLabel: session.itemLabel,
+              itemDescription: session.itemDescription,
+              itemPriority: session.itemPriority,
+              itemStatus: session.itemStatus,
+              dateTimeSet: session.dateTimeSet,
+              dueDateTime: session.dueDateTime,
+            },
           })),
         };
       }
@@ -106,7 +114,7 @@ export class TasksService {
         data: updatedTaskData,
       });
   
-      console.log("Updated task:", updatedTask);
+      // console.log("Updated task:", updatedTask);
       return updatedTask;
     } catch (error) {
       console.error("Error during task update:", {
@@ -116,6 +124,7 @@ export class TasksService {
       throw new Error(`Error updating task: ${error.message}`);
     }
   }
+  
   
 
   async updateTimeTask(

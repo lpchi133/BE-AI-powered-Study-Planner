@@ -76,7 +76,6 @@ export class TasksController {
     if (!req.user) {
       throw new UnauthorizedException("Access denied");
     }
-    console.log("body:", body);
     const userId = req.user.id;
     const { itemLabel, itemPriority, itemStatus, dateTimeSet, dueDateTime } =
       body;
