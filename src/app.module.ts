@@ -6,10 +6,16 @@ import { UsersModule } from "./users/users.module";
 import { JwtMiddleware } from "./middlewares/jwt.middleware";
 import { TasksModule } from "./tasks/tasks.module";
 import { AiSuggestionModule } from "./ai-suggestion/ai-suggestion.module";
-import { FocusTimerModule } from './focus-timer/focus-timer.module';
+import { FocusTimerModule } from "./focus-timer/focus-timer.module";
 
 @Module({
-  imports: [AuthModule, UsersModule, TasksModule, AiSuggestionModule, FocusTimerModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    TasksModule,
+    AiSuggestionModule,
+    FocusTimerModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

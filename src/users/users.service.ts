@@ -7,7 +7,7 @@ import { Users } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findByEmail(email: string) {
     return this.prisma.users.findUnique({ where: { email } });
@@ -152,5 +152,13 @@ export class UsersService {
       console.error("Error changing password:", error);
       return { success: false, message: "Error changing password" };
     }
+  }
+
+  async updatePassword(userId: number, newPassword: string) {
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.users.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword },
+    });
   }
 }

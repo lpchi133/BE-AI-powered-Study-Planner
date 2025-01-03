@@ -4,6 +4,7 @@ import {
   Get,
   HttpStatus,
   Post,
+  Put,
   Request,
   Res,
   UseGuards,
@@ -16,12 +17,14 @@ import { config } from "dotenv";
 import { AuthService } from "./auth.service";
 import { RegisterUserDto } from "./dto/register.dto";
 import { LocalAuthGuard } from "./guards/local.guard";
+import { ForgotPwDto } from "./dto/forgot-pw.dto";
+import { ResetPwDto } from "./dto/reset-pw.dto";
 
 config();
 
 @Controller("auth")
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post("register")
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
@@ -54,6 +57,21 @@ export class AuthController {
     }
 
     return res.redirect(process.env.FRONTEND_URL);
+  }
+
+  @Post("forgot-password")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async forgotPassword(@Body() forgotPwDto: ForgotPwDto) {
+    return this.authService.forgotPassword(forgotPwDto.email);
+  }
+
+  @Put("reset-password")
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async resetPassword(@Body() resetPwDto: ResetPwDto) {
+    return this.authService.resetPassword(
+      resetPwDto.newPassword,
+      resetPwDto.token,
+    );
   }
 
   @Get("activate")

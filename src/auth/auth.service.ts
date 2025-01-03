@@ -99,5 +99,39 @@ export class AuthService {
       user: req.user,
     };
   }
-  
+
+  async forgotPassword(email: string) {
+    //check that user exists
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException("Email not registered.");
+    }
+
+    if (!user.isActive) {
+      throw new BadRequestException("Email not activated.");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _pass, ...payload } = user;
+    const accessToken = this.jwtService.sign(payload);
+    //generate pw reset link
+    await this.mailService.sendPasswordResetEmail(email, accessToken);
+
+    return { message: "Email sent." };
+  }
+
+  async resetPassword(newPassword: string, token: string) {
+    try {
+      const payload = this.jwtService.verify(token);
+      const user = await this.userService.findByEmail(payload.email);
+      if (!user) {
+        throw new BadRequestException("Email not found/ Email not registered.");
+      }
+      await this.userService.updatePassword(user.id, newPassword);
+      return { message: "success" };
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error: any) {
+      throw new BadRequestException("Invalid or expired token.");
+    }
+  }
 }

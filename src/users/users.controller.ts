@@ -11,16 +11,19 @@ import {
   UseGuards,
   Req,
   Body,
+  UsePipes,
+  ValidationPipe,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { JwtMiddleware } from "../middlewares/jwt.middleware";
 import { UsersService } from "./users.service";
 import { Express } from "express";
 import * as multer from "multer";
+import { ChangePasswordDto } from "./dto/change-password.dto";
 
 @Controller("users")
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   @Get("profile")
   async getProfile(@Request() req) {
@@ -91,9 +94,10 @@ export class UsersController {
 
   @Put("changePassword")
   @UseGuards(JwtMiddleware)
-  async changePassword(@Req() req, @Body() body, @Res() res) {
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  async changePassword(@Req() req, @Body() dto: ChangePasswordDto, @Res() res) {
     const userId = req.user.id;
-    const { currentPassword, newPassword } = body;
+    const { currentPassword, newPassword } = dto;
 
     const result = await this.usersService.changePassword(
       userId,

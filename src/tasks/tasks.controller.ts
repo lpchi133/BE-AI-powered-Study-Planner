@@ -12,7 +12,7 @@ import { JwtMiddleware } from "src/middlewares/jwt.middleware";
 
 @Controller("tasks")
 export class TasksController {
-  constructor(private tasksService: TasksService) { }
+  constructor(private tasksService: TasksService) {}
 
   @Post("createTask")
   @UseGuards(JwtMiddleware)
@@ -76,7 +76,6 @@ export class TasksController {
     if (!req.user) {
       throw new UnauthorizedException("Access denied");
     }
-
     const userId = req.user.id;
     const { itemLabel, itemPriority, itemStatus, dateTimeSet, dueDateTime } =
       body;
