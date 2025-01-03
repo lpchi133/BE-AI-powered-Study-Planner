@@ -4,45 +4,23 @@ import { RegisterUserDto } from "./dto/register.dto";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
 import { Users } from "@prisma/client";
-import { Resend } from 'resend';
 import { v4 as uuidv4 } from 'uuid';
+import { MailService } from "../services/mail.service";
+
 
 @Injectable()
 export class AuthService {
-  private resend = new Resend(`${process.env.YOUR_RESEND_API_KEY}`);
 
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
+
   ) {}
 
   generateJwt(payload) {
     return this.jwtService.sign(payload);
   }
-
-  async sendActivationEmail(email: string, activationLink: string, isActive: boolean) {
-    try {
-      const emailContent = isActive
-        ? {
-            subject: 'Account Already Active',
-            html: `<p>Your account associated with this email is already active. No further action is needed.</p>`,
-          }
-        : {
-            subject: 'Activate your account',
-            html: `<p>Please click the following link to activate your account:</p><a href="${activationLink}">Activate Account</a>`,
-          };
-  
-      await this.resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: email,
-        subject: emailContent.subject,
-        html: emailContent.html,
-      });
-    } catch (error) {
-      throw new BadRequestException('Failed to send activation email', error);
-    }
-  }
-  
 
   async register(
     dto: RegisterUserDto,
@@ -66,7 +44,7 @@ export class AuthService {
     });
 
     const activationLink = `${process.env.FRONTEND_URL}/activate?token=${activationToken}`;
-    await this.sendActivationEmail(dto.email, activationLink, dto.isActive);
+    await this.mailService.sendActivationEmail(dto.email, activationLink, dto.isActive);
 
     return { message: "Registration successful! Please check your email to activate your account.", newUser: user };
   }
@@ -121,4 +99,5 @@ export class AuthService {
       user: req.user,
     };
   }
+  
 }

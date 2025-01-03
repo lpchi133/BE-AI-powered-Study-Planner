@@ -9,6 +9,7 @@ import { PassportModule } from "@nestjs/passport";
 import { UsersModule } from "../users/users.module";
 import { JwtStrategy } from "./strategy/jwt.strategy";
 import { GoogleStrategy } from "./strategy/google.strategy";
+import { MailService } from "src/services/mail.service";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { GoogleStrategy } from "./strategy/google.strategy";
     AuthService,
     UsersService,
     PrismaService,
+    MailService,
     LocalStrategy,
     JwtStrategy,
     GoogleStrategy,
