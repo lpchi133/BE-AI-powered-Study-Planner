@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { FocusTimerController } from './focus-timer.controller';
+import { Test, TestingModule } from "@nestjs/testing";
+import { FocusTimerController } from "./focus-timer.controller";
 
-describe('FocusTimerController', () => {
+describe("FocusTimerController", () => {
   let controller: FocusTimerController;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('FocusTimerController', () => {
     controller = module.get<FocusTimerController>(FocusTimerController);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(controller).toBeDefined();
   });
 });

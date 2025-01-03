@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { FocusTimerService } from './focus-timer.service';
+import { Test, TestingModule } from "@nestjs/testing";
+import { FocusTimerService } from "./focus-timer.service";
 
-describe('FocusTimerService', () => {
+describe("FocusTimerService", () => {
   let service: FocusTimerService;
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('FocusTimerService', () => {
     service = module.get<FocusTimerService>(FocusTimerService);
   });
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined();
   });
 });

@@ -3,7 +3,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async createTask(
     userId: number,
@@ -16,8 +16,6 @@ export class TasksService {
       dueDateTime: string;
     },
   ) {
-
-
     // Tạo task mới và lưu vào cơ sở dữ liệu
     return this.prisma.task.create({
       data: {
@@ -25,13 +23,12 @@ export class TasksService {
         itemDescription: data.itemDescription,
         itemPriority: data.itemPriority,
         itemStatus: data.itemStatus,
-        dateTimeSet: data.dateTimeSet,  // Chuyển sang ISO string
-        dueDateTime: data.dueDateTime,  // Chuyển sang ISO string
+        dateTimeSet: data.dateTimeSet, // Chuyển sang ISO string
+        dueDateTime: data.dueDateTime, // Chuyển sang ISO string
         userId: userId,
       },
     });
   }
-
 
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
