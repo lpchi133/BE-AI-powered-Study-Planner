@@ -1,9 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { TaskGateway } from './tasks.gateway';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import moment from "moment";
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService,
+    private readonly taskGateway: TaskGateway) { }
 
   async createTask(
     userId: number,
@@ -16,8 +20,8 @@ export class TasksService {
       dueDateTime: string;
     },
   ) {
-    
-  
+
+
     // Tạo task mới và lưu vào cơ sở dữ liệu
     return this.prisma.task.create({
       data: {
@@ -25,13 +29,13 @@ export class TasksService {
         itemDescription: data.itemDescription,
         itemPriority: data.itemPriority,
         itemStatus: data.itemStatus,
-        dateTimeSet: data.dateTimeSet, // Chuyển sang ISO string
-        dueDateTime: data.dueDateTime, // Chuyển sang ISO string
+        dateTimeSet: data.dateTimeSet,
+        dueDateTime: data.dueDateTime,
         userId: userId,
       },
     });
   }
-  
+
 
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
@@ -48,12 +52,12 @@ export class TasksService {
       await this.prisma.focusSession.deleteMany({
         where: { taskId: taskId },
       });
-  
+
       // Sau đó xóa nhiệm vụ
       await this.prisma.task.delete({
         where: { id: taskId },
       });
-  
+
       return { status: "success" };
     } catch (error) {
       throw new Error(`Error deleting task: ${error.message}`);
@@ -74,24 +78,22 @@ export class TasksService {
     },
   ) {
     const { id, focusSessions, ...rest } = data;
-  
-    console.log("Update data:", rest);
-  
+
     try {
       const task = await this.prisma.task.findUnique({
         where: { id },
       });
-  
+
       if (!task) {
         throw new Error("Task not found");
       }
-  
+
       if (task.userId !== userId) {
         throw new Error("Invalid user");
       }
-  
+
       const updatedTaskData: any = { ...rest };
-  
+
       // Handle updating focus sessions if provided
       if (focusSessions && focusSessions.length > 0) {
         updatedTaskData.focusSessions = {
@@ -108,12 +110,12 @@ export class TasksService {
           })),
         };
       }
-  
+
       const updatedTask = await this.prisma.task.update({
         where: { id },
         data: updatedTaskData,
       });
-  
+
       // console.log("Updated task:", updatedTask);
       return updatedTask;
     } catch (error) {
@@ -124,8 +126,8 @@ export class TasksService {
       throw new Error(`Error updating task: ${error.message}`);
     }
   }
-  
-  
+
+
 
   async updateTimeTask(
     userId: number,
@@ -190,4 +192,23 @@ export class TasksService {
       throw new Error(`Error updating task status: ${error.message}`);
     }
   }
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async checkOverdueTasks(userId: number) {
+    const overdueTasks = await this.prisma.task.findMany({
+      where: {
+        dueDateTime: { lte: moment().tz('Asia/Ho_Chi_Minh').format("YYYY-MM-DDTHH:mm") },
+        userId,
+        itemStatus: 'OnGoing',
+      },
+    });
+
+    if (overdueTasks.length > 0) {
+      for (const task of overdueTasks) {
+        await this.taskGateway.sendOverdueNotificationToUser(task.userId, task.id); //send notification to specify user
+      }
+    }
+
+    return overdueTasks;
+  }
+
 }
