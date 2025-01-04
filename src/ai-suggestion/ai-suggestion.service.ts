@@ -50,4 +50,27 @@ export class AiSuggestionService {
 
     return result.response.text();
   }
+
+
+  async generateAISuggestionForFeedBack(userId: number) {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    //get all tasks of user
+    const tasks = await this.tasksService.getAllTasks(userId);
+
+    const prompt = `
+            You are a preofessional in schedule and structuring task. Please analyze this schedule and offering motivational feedback to encourage consistency and improvement:
+            ${tasks.map(this.mapTaskToPrompt).join("\n")}
+            Base on:
+            1. Are there any tight schedules?
+            2. Feed back on the prioritization.
+             Notes:
+             - Please bold the name task when giving feedbacks.
+             - The feedbacks should be note in bullet points with improvements and encouragements.
+             - Make the feedbacks as detailed as possible, provide reasons for each suggestion and professional advice.
+        `;
+    const result = await model.generateContent(prompt);
+
+    return result.response.text();
+  }
 }

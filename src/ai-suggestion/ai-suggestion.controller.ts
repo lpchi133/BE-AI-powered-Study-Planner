@@ -24,4 +24,17 @@ export class AiSuggestionController {
 
     return tasks;
   }
+
+  @Get("/feed-back")
+  @UseGuards(JwtMiddleware)
+  async generateFeedBack(@Request() req) {
+    if (!req.user) {
+      throw new UnauthorizedException(req.user);
+    }
+
+    const userId = req.user.id;
+    const tasks = await this.AiSuggestionService.generateAISuggestionForFeedBack(userId);
+
+    return tasks;
+  }
 }
