@@ -28,7 +28,7 @@ export class FocusTimerService {
       throw new BadRequestException("Task is not in progress");
 
     const now = moment().tz('Asia/Ho_Chi_Minh');
-    const deadline = moment(task.dueDateTime);
+    const deadline = moment(task.dueDateTime).tz('Asia/Ho_Chi_Minh');
     if (now.isAfter(task.dueDateTime)) {
       throw new BadRequestException('Task is overdue');
     }
