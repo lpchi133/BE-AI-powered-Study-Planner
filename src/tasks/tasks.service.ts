@@ -14,10 +14,8 @@ export class TasksService {
       itemStatus: string;
       dateTimeSet: string;
       dueDateTime: string;
-    },
+    }
   ) {
-    
-  
     // Tạo task mới và lưu vào cơ sở dữ liệu
     return this.prisma.task.create({
       data: {
@@ -31,7 +29,6 @@ export class TasksService {
       },
     });
   }
-  
 
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
@@ -42,18 +39,24 @@ export class TasksService {
     });
   }
 
+  async getTaskByIds(taskIds: number[]) {
+    return this.prisma.task.findMany({
+      where: { id: { in: taskIds } },
+    });
+  }
+
   async deleteTask(taskId: number) {
     try {
       // Xóa tất cả các phiên tập trung liên quan đến nhiệm vụ
       await this.prisma.focusSession.deleteMany({
         where: { taskId: taskId },
       });
-  
+
       // Sau đó xóa nhiệm vụ
       await this.prisma.task.delete({
         where: { id: taskId },
       });
-  
+
       return { status: "success" };
     } catch (error) {
       throw new Error(`Error deleting task: ${error.message}`);
@@ -71,27 +74,25 @@ export class TasksService {
       dateTimeSet: string;
       dueDateTime: string;
       focusSessions?: any[]; // Optional
-    },
+    }
   ) {
     const { id, focusSessions, ...rest } = data;
-  
-    console.log("Update data:", rest);
-  
+
     try {
       const task = await this.prisma.task.findUnique({
         where: { id },
       });
-  
+
       if (!task) {
         throw new Error("Task not found");
       }
-  
+
       if (task.userId !== userId) {
         throw new Error("Invalid user");
       }
-  
+
       const updatedTaskData: any = { ...rest };
-  
+
       // Handle updating focus sessions if provided
       if (focusSessions && focusSessions.length > 0) {
         updatedTaskData.focusSessions = {
@@ -108,13 +109,12 @@ export class TasksService {
           })),
         };
       }
-  
+
       const updatedTask = await this.prisma.task.update({
         where: { id },
         data: updatedTaskData,
       });
-  
-      // console.log("Updated task:", updatedTask);
+
       return updatedTask;
     } catch (error) {
       console.error("Error during task update:", {
@@ -124,14 +124,12 @@ export class TasksService {
       throw new Error(`Error updating task: ${error.message}`);
     }
   }
-  
-  
 
   async updateTimeTask(
     userId: number,
     id: number,
     start_date: string,
-    date: string,
+    date: string
   ) {
     // Check if task exists
     const task = await this.prisma.task.findFirst({
@@ -140,7 +138,7 @@ export class TasksService {
 
     if (!task) {
       throw new Error(
-        "Task not found or you do not have permission to update this task",
+        "Task not found or you do not have permission to update this task"
       );
     }
 
