@@ -1,13 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { TaskGateway } from './tasks.gateway';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { TaskGateway } from "./tasks.gateway";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import moment from "moment";
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService,
-    private readonly taskGateway: TaskGateway) { }
+  constructor(
+    private prisma: PrismaService,
+    private readonly taskGateway: TaskGateway
+  ) {}
 
   async createTask(
     userId: number,
@@ -18,10 +20,8 @@ export class TasksService {
       itemStatus: string;
       dateTimeSet: string;
       dueDateTime: string;
-    },
+    }
   ) {
-
-
     // Tạo task mới và lưu vào cơ sở dữ liệu
     return this.prisma.task.create({
       data: {
@@ -36,13 +36,18 @@ export class TasksService {
     });
   }
 
-
   async getAllTasks(userId: number) {
     return this.prisma.task.findMany({
       where: { userId: userId },
       include: {
         focusSessions: true, // Include the focusSessions relation
       },
+    });
+  }
+
+  async getTaskByIds(taskIds: number[]) {
+    return this.prisma.task.findMany({
+      where: { id: { in: taskIds } },
     });
   }
 
@@ -75,7 +80,7 @@ export class TasksService {
       dateTimeSet: string;
       dueDateTime: string;
       focusSessions?: any[]; // Optional
-    },
+    }
   ) {
     const { id, focusSessions, ...rest } = data;
 
@@ -127,13 +132,11 @@ export class TasksService {
     }
   }
 
-
-
   async updateTimeTask(
     userId: number,
     id: number,
     start_date: string,
-    date: string,
+    date: string
   ) {
     // Check if task exists
     const task = await this.prisma.task.findFirst({
@@ -142,7 +145,7 @@ export class TasksService {
 
     if (!task) {
       throw new Error(
-        "Task not found or you do not have permission to update this task",
+        "Task not found or you do not have permission to update this task"
       );
     }
 
@@ -196,19 +199,23 @@ export class TasksService {
   async checkOverdueTasks(userId: number) {
     const overdueTasks = await this.prisma.task.findMany({
       where: {
-        dueDateTime: { lte: moment().tz('Asia/Ho_Chi_Minh').format("YYYY-MM-DDTHH:mm") },
+        dueDateTime: {
+          lte: moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DDTHH:mm"),
+        },
         userId,
-        itemStatus: 'OnGoing',
+        itemStatus: "OnGoing",
       },
     });
 
     if (overdueTasks.length > 0) {
       for (const task of overdueTasks) {
-        await this.taskGateway.sendOverdueNotificationToUser(task.userId, task.id); //send notification to specify user
+        await this.taskGateway.sendOverdueNotificationToUser(
+          task.userId,
+          task.id
+        ); //send notification to specify user
       }
     }
 
     return overdueTasks;
   }
-
 }

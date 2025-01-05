@@ -31,9 +31,11 @@ export class AiSuggestionController {
     if (!req.user) {
       throw new UnauthorizedException(req.user);
     }
-
-    const userId = req.user.id;
-    const tasks = await this.AiSuggestionService.generateAISuggestionForFeedBack(userId);
+    const tasksIds = req.query.taskIds || ([] as string[]);
+    const tasks =
+      await this.AiSuggestionService.generateAISuggestionForFeedBack(
+        tasksIds.map(Number)
+      );
 
     return tasks;
   }

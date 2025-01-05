@@ -7,18 +7,19 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export class AiSuggestionService {
   constructor(
     private prisma: PrismaService,
-    private tasksService: TasksService,
+    private tasksService: TasksService
   ) {}
 
-  mapTaskToPrompt(task:{    id: number;
+  mapTaskToPrompt(task: {
+    id: number;
     itemLabel: string;
     itemDescription: string;
     itemPriority: string;
     itemStatus: string;
     dateTimeSet: string;
     dueDateTime: string;
-    focusTime: number|null;
-    breakTime:number|null;
+    focusTime: number | null;
+    breakTime: number | null;
   }) {
     return `- TaskId:${task.id}, Name: ${task.itemLabel}, Priority: ${task.itemPriority}, Status: ${task.itemStatus}, Start: ${task.dateTimeSet}, Due: ${task.dueDateTime}, Focus Time: ${task.focusTime}, Break Time: ${task.breakTime}`;
   }
@@ -51,12 +52,11 @@ export class AiSuggestionService {
     return result.response.text();
   }
 
-
-  async generateAISuggestionForFeedBack(userId: number) {
+  async generateAISuggestionForFeedBack(taskIds: number[]) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     //get all tasks of user
-    const tasks = await this.tasksService.getAllTasks(userId);
+    const tasks = await this.tasksService.getTaskByIds(taskIds);
 
     const prompt = `
             You are a preofessional in schedule and structuring task. Please analyze this schedule and offering motivational feedback to encourage consistency and improvement:
