@@ -5,43 +5,15 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import moment from "moment-timezone";
-import { FocusTimerGateway } from "./focus-timer.gateway";
+import * as Ably from 'ably';
 
 @Injectable()
 export class FocusTimerService {
 
   private activeTimers = new Map<number, NodeJS.Timeout>();
+  private ablyClient: Ably.Realtime;
 
-  constructor(private prisma: PrismaService, private focusTimerGateway: FocusTimerGateway,) { }
-
-  private async monitorDeadline(taskId: number, sessionId: number, deadline: moment.Moment) {
-    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh'));
-
-    // Clear any existing timers for the same task
-    if (this.activeTimers.has(taskId)) {
-      clearTimeout(this.activeTimers.get(taskId));
-    }
-
-    const timeout = setTimeout(async () => {
-      // Fetch the session to get startedAt
-      const session = await this.prisma.focusSession.findUnique({ where: { id: sessionId } });
-      if (!session) return;
-
-      const startedAt = moment(session.startedAt).tz('Asia/Ho_Chi_Minh');
-      const duration = moment().tz('Asia/Ho_Chi_Minh').diff(startedAt, 'seconds'); // Calculate duration in seconds
-
-      // End the session with the calculated duration
-      await this.endFocusSession(sessionId, duration);
-
-      console.log(`Task ${taskId} deadline met. Timer ended.`);
-
-      // Notify the user via WebSocket
-      this.focusTimerGateway.notifyUser(taskId, 'The task deadline has been reached. Timer ended.');
-    }, timeUntilDeadline);
-
-    this.activeTimers.set(taskId, timeout);
-  }
-
+  constructor(private prisma: PrismaService) { this.ablyClient = new Ably.Realtime({ key: process.env.ABLY_API_KEY }); }
 
   async startFocusSession(
     taskId: number,
@@ -121,4 +93,40 @@ export class FocusTimerService {
 
     return { message: "Timer canceled successfully" };
   }
+
+  //notify user when task deadline is reached
+  notifyUser(taskId: number, message: string) {
+    const channel = this.ablyClient.channels.get(`task-updates`);
+    channel.publish("taskDeadlineReached", { taskId, message });
+  }
+
+  //monitor task deadline
+  private async monitorDeadline(taskId: number, sessionId: number, deadline: moment.Moment) {
+    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh'));
+
+    // Clear any existing timers for the same task
+    if (this.activeTimers.has(taskId)) {
+      clearTimeout(this.activeTimers.get(taskId));
+    }
+
+    const timeout = setTimeout(async () => {
+      // Fetch the session to get startedAt
+      const session = await this.prisma.focusSession.findUnique({ where: { id: sessionId } });
+      if (!session) return;
+
+      const startedAt = moment(session.startedAt).tz('Asia/Ho_Chi_Minh');
+      const duration = moment().tz('Asia/Ho_Chi_Minh').diff(startedAt, 'seconds'); // Calculate duration in seconds
+
+      // End the session with the calculated duration
+      await this.endFocusSession(sessionId, duration);
+
+      console.log(`Task ${taskId} deadline met. Timer ended.`);
+
+      // Notify the user via WebSocket
+      this.notifyUser(taskId, 'The task deadline has been reached. Timer ended.');
+    }, timeUntilDeadline);
+
+    this.activeTimers.set(taskId, timeout);
+  }
+
 }

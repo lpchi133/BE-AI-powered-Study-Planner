@@ -1,15 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { TaskGateway } from "./tasks.gateway";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import moment from "moment";
+import * as Ably from 'ably';
 
 @Injectable()
 export class TasksService {
+  private ablyClient: Ably.Realtime;
+
   constructor(
     private prisma: PrismaService,
-    private readonly taskGateway: TaskGateway
-  ) {}
+  ) { this.ablyClient = new Ably.Realtime({ key: process.env.ABLY_API_KEY }); }
 
   async createTask(
     userId: number,
@@ -195,25 +196,39 @@ export class TasksService {
       throw new Error(`Error updating task status: ${error.message}`);
     }
   }
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  async checkOverdueTasks(userId: number) {
+
+  // send notification to user
+  private async sendNotificationToUser(userId: number, taskId: number, message: string) {
+    const channel = this.ablyClient.channels.get(`user-${userId}`);
+    channel.publish('task-overdue', { taskId, message });
+    console.log(`Notification sent to user ${userId} for task ${taskId}`);
+  }
+
+  // Check for overdue tasks every minute
+  @Cron(CronExpression.EVERY_MINUTE)
+  async checkOverdueTasks() {
     const overdueTasks = await this.prisma.task.findMany({
       where: {
         dueDateTime: {
-          lte: moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DDTHH:mm"),
+          lte: moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'),
         },
-        userId,
-        itemStatus: "OnGoing",
+        itemStatus: 'OnGoing',
       },
     });
 
-    if (overdueTasks.length > 0) {
-      for (const task of overdueTasks) {
-        await this.taskGateway.sendOverdueNotificationToUser(
-          task.userId,
-          task.id
-        ); //send notification to specify user
-      }
+    for (const task of overdueTasks) {
+      // Phát thông báo khi task bị quá hạn
+      await this.sendNotificationToUser(
+        task.userId,
+        task.id,
+        `Task ${task.id} has exceeded its deadline!`,
+      );
+
+      // (Tuỳ chọn) Cập nhật trạng thái task thành "Overdue"
+      await this.prisma.task.update({
+        where: { id: task.id },
+        data: { itemStatus: 'Overdue' },
+      });
     }
 
     return overdueTasks;
