@@ -7,6 +7,7 @@ import { JwtMiddleware } from "./middlewares/jwt.middleware";
 import { TasksModule } from "./tasks/tasks.module";
 import { AiSuggestionModule } from "./ai-suggestion/ai-suggestion.module";
 import { FocusTimerModule } from "./focus-timer/focus-timer.module";
+import { ScheduleModule } from "@nestjs/schedule";
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { FocusTimerModule } from "./focus-timer/focus-timer.module";
     TasksModule,
     AiSuggestionModule,
     FocusTimerModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

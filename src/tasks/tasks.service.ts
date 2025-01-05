@@ -1,9 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { TaskGateway } from "./tasks.gateway";
+import { Cron, CronExpression } from "@nestjs/schedule";
+import moment from "moment";
 
 @Injectable()
 export class TasksService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly taskGateway: TaskGateway
+  ) {}
 
   async createTask(
     userId: number,
@@ -23,8 +29,8 @@ export class TasksService {
         itemDescription: data.itemDescription,
         itemPriority: data.itemPriority,
         itemStatus: data.itemStatus,
-        dateTimeSet: data.dateTimeSet, // Chuyển sang ISO string
-        dueDateTime: data.dueDateTime, // Chuyển sang ISO string
+        dateTimeSet: data.dateTimeSet,
+        dueDateTime: data.dueDateTime,
         userId: userId,
       },
     });
@@ -115,6 +121,7 @@ export class TasksService {
         data: updatedTaskData,
       });
 
+      // console.log("Updated task:", updatedTask);
       return updatedTask;
     } catch (error) {
       console.error("Error during task update:", {
@@ -187,5 +194,28 @@ export class TasksService {
     } catch (error) {
       throw new Error(`Error updating task status: ${error.message}`);
     }
+  }
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async checkOverdueTasks(userId: number) {
+    const overdueTasks = await this.prisma.task.findMany({
+      where: {
+        dueDateTime: {
+          lte: moment().tz("Asia/Ho_Chi_Minh").format("YYYY-MM-DDTHH:mm"),
+        },
+        userId,
+        itemStatus: "OnGoing",
+      },
+    });
+
+    if (overdueTasks.length > 0) {
+      for (const task of overdueTasks) {
+        await this.taskGateway.sendOverdueNotificationToUser(
+          task.userId,
+          task.id
+        ); //send notification to specify user
+      }
+    }
+
+    return overdueTasks;
   }
 }
