@@ -28,8 +28,8 @@ export class FocusTimerService {
       throw new BadRequestException("Task is not in progress");
 
     const now = moment().tz('Asia/Ho_Chi_Minh');
-    const deadline = moment(task.dueDateTime).tz('Asia/Ho_Chi_Minh');
-    if (now.isAfter(deadline)) {
+    const deadline = moment(task.dueDateTime);
+    if (now.isAfter(task.dueDateTime)) {
       throw new BadRequestException('Task is overdue');
     }
 
@@ -102,7 +102,7 @@ export class FocusTimerService {
 
   //monitor task deadline
   private async monitorDeadline(taskId: number, sessionId: number, deadline: moment.Moment) {
-    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh'));
+    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'));
 
     // Clear any existing timers for the same task
     if (this.activeTimers.has(taskId)) {
@@ -114,7 +114,7 @@ export class FocusTimerService {
       const session = await this.prisma.focusSession.findUnique({ where: { id: sessionId } });
       if (!session) return;
 
-      const startedAt = moment(session.startedAt).tz('Asia/Ho_Chi_Minh');
+      const startedAt = moment(session.startedAt);
       const duration = moment().tz('Asia/Ho_Chi_Minh').diff(startedAt, 'seconds'); // Calculate duration in seconds
 
       // End the session with the calculated duration
