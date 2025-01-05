@@ -102,7 +102,7 @@ export class FocusTimerService {
 
   //monitor task deadline
   private async monitorDeadline(taskId: number, sessionId: number, deadline: moment.Moment) {
-    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm'));
+    const timeUntilDeadline = deadline.diff(moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DDTHH:mm:ss'));
 
     // Clear any existing timers for the same task
     if (this.activeTimers.has(taskId)) {
