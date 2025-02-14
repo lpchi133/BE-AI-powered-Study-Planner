@@ -1,4 +1,4 @@
-  <p align="center">
+<p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p> 
     
@@ -24,52 +24,142 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The backend for the **AI-Powered Study Planner** is built using **NestJS** and **Prisma**, with a **PostgreSQL** database. It provides API services for user authentication, task management, scheduling, and AI-powered study insights.
 
-## Project setup
+## Features
+- **User Authentication**: Secure authentication with JWT-based authorization.
+- **Task Management**: Create, update, delete, and retrieve tasks.
+- **Calendar & Scheduling**: Handle study schedule with task prioritization.
+- **Pomodoro Timer Support**: Manage study sessions effectively.
+- **AI Feedback System**: Generate personalized feedback using AI.
+- **Real-time Synchronization**: WebSocket-based updates with **Ably**.
+- **Password Reset**: Secure password recovery through email verification.
 
-```bash
-$ npm install
+## Technologies Used
+
+- **NestJS**: A progressive Node.js framework for building efficient, scalable applications.
+- **Prisma**: ORM for interacting with PostgreSQL.
+- **PostgreSQL**: Relational database for storing user and task data.
+- **Ably**: WebSocket-based real-time updates.
+- **Passport.js** - Authentication middleware (supports Google and email/password login).
+- **Cloudinary**: Image storage for profile pictures.
+- **Nodemailer** - Email service for password reset functionality.
+
+
+## Project Structure
+
+```
+BE-AI-powered-Study-Planner/
+├── src/
+│   ├── auth/         # Authentication module (JWT, Google OAuth, Passport.js)
+│   ├── users/        # User management module
+│   ├── tasks/        # Task management module
+│   ├── ai-suggestion/   # AI suggestion module for generating study suggestions and feedback 
+|   ├── focus-timer/  # Focus timer module for managing study sessions
+|   ├── cloudinary/   # Cloudinary configuration for image storage
+|   |   └── cloudinary.config.ts
+|   ├── middlewares/  # Custom middlewares
+|   ├── prisma/       # Prisma service for database interactions
+|   ├── services/     # Additional services
+│   ├── main.ts       # Entry point of the application 
+|   ├── app.controller.ts # Main application controller
+|   ├── app.controller.spec.ts  # Unit tests for the main application controller 
+|   ├── app.service.ts    # Main application service
+│   └── app.module.ts     # Main application module
+├── prisma/
+│   ├── schema.prisma # Prisma schema definition
+|   └── migrations/   # Database migrations
+├── .env              # Environment variables
+├── package.json      # Dependencies and scripts
+├── tsconfig.json     # TypeScript configuration
+├── README.md         # Documentation
+└── ...
 ```
 
-## Compile and run the project
 
-```bash
-# development
-$ npm run start
+## Installation & Setup
 
-# watch mode
-$ npm run start:dev
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/lpchi133/BE-AI-powered-Study-Planner.git
+   ```
 
-# production mode
-$ npm run start:prod
-```
+2. **Install dependencies:**
+   ```sh
+   npm install
+   ```
 
-## Run tests
+3. **Set up environment variables:**
+   Create a `.env` file and configure the following variables:
+   ```env
+    DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+    JWT_SECRET=<YOUR_JWT_SECRET>
+    JWT_EXPIRES_IN="1h"
+    FRONTEND_URL="http://localhost:5173"
+    GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
+    GOOGLE_CLIENT_SECRET=<YOUR_GOOGLE_CLIENT_SECRET>
+    GOOGLE_CALLBACK_URL=<YOUR_GOOGLE_CALLBACK_URL>
 
-```bash
-# unit tests
-$ npm run test
+    CLOUDINARY_CLOUD_NAME=<YOUR_CLOUDINARY_CLOUD_NAME>
+    CLOUDINARY_API_KEY=<YOUR_CLOUDINARY_API_KEY>
+    CLOUDINARY_API_SECRET=<YOUR_CLOUDINARY_APT_SECRET>
+    GEMINI_API_KEY=<YOUR_GEMINI_API>
 
-# e2e tests
-$ npm run test:e2e
+    MAIL_USER=<YOUR_MAIL_USER>
+    MAIL_PASS=<YOUR_MAIL_PASS>
 
-# test coverage
-$ npm run test:cov
-```
+    ABLY_API_KEY=<YOUR_ABLY_API_KEY>
 
-## Deployment
+   ```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+4. **Run database migration:**
+   ```sh
+   npx prisma migrate dev
+   ```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+5. **Start the development server:**
+   ```sh
+   npm run start:dev
+   ```
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+## 📌 API Endpoints
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### **Authentication**
+
+- **`POST /auth/register `** - Register a new user
+- **`POST /auth/login`** - Log in with email/password
+- **`GET /auth/google`** - Log in using Google OAuth
+- **`GET /auth/google-redirect`** - Google OAuth redirect
+- **`POST /auth/forgot-password`** - Request password reset email
+- **`PUT /auth/reset-password`** - Reset password  using token
+- **`GET /auth/activate`** - Activate user account
+
+### **Tasks Management**
+
+- **`GET /tasks`** - Get all tasks for a user
+- **`POST /tasks/createTask`** - Create a new task
+- **`POST /tasks/deleteTask`** - Delete a task
+- **`POST /tasks/updateTask`** - Update an existing task
+- **`POST /tasks/updateTimeTask`** - Update task time
+- **`POST /tasks/updateTaskStatus`** - Update task status
+
+### **AI Suggestions**
+
+- **`GET /ai-suggestion/`** - Generate AI-powered study suggestions
+- **`GET /ai-suggestion/feed-back`** - Generate AI-powered feedback for tasks
+
+### **Focus Timer**
+
+- **`POST /focus-timer/:taskId/start`** - Start focus timer for a task
+- **`PATCH /focus-timer/:sessionId/end`** - End focus timer session
+- **`DELETE /focus-timer/cancel - Cancel`** focus timer session
+
+### **Users**
+
+- **`GET /users/profile`** - Get user profile
+- **`POST /users/changeAvt`** - Change user avatar
+- **`PUT /users/update`** - Update user information
+- **`PUT /users/changePassword`** - Change user password
 
 ## Resources
 
@@ -83,18 +173,3 @@ Check out a few resources that may come in handy when working with NestJS:
 - Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
 - To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
 - Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
