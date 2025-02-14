@@ -22,6 +22,22 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
+
+## Table of Contents
+- [Description](#description)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Project Structure](#project-structure)
+- [Installation & Setup](#installation--setup)
+- [API Endpoints](#api-endpoints)
+  - [Authentication](#authentication)
+  - [Tasks Management](#tasks-management)
+  - [AI Suggestions](#ai-suggestions)
+  - [Focus Timer](#focus-timer)
+  - [Users](#users)
+- [Frontend Repository](#frontend-repository)
+- [Resources](#resources)
+
 ## Description
 
 The backend for the **AI-Powered Study Planner** is built using **NestJS** and **Prisma**, with a **PostgreSQL** database. It provides API services for user authentication, task management, scheduling, and AI-powered study insights.
@@ -122,7 +138,7 @@ BE-AI-powered-Study-Planner/
    npm run start:dev
    ```
 
-## 📌 API Endpoints
+## API Endpoints
 
 ### **Authentication**
 
@@ -160,6 +176,9 @@ BE-AI-powered-Study-Planner/
 - **`POST /users/changeAvt`** - Change user avatar
 - **`PUT /users/update`** - Update user information
 - **`PUT /users/changePassword`** - Change user password
+
+## Frontend Repository
+You can find the frontend repository for this project [here](https://github.com/lpchi133/FE-AI-powered-Study-Planner).
 
 ## Resources
 
